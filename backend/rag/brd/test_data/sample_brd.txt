@@ -1,0 +1,9 @@
+Product Launch BRD — Sample (test document)
+
+Section 4.2: Lending product rules
+
+The system shall approve personal loans up to ₹50 lakhs within 24 hours. Minimal KYC will be collected for eligible customers. Interest rate will be set at 14% per annum for this product. Only scheduled commercial banks will be eligible to offer this product.
+
+Section 4.3: Risk
+
+Credit risk assessment must be performed before any loan approval.

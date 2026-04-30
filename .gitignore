@@ -1,0 +1,18 @@
+.env
+__pycache__/
+*.pyc
+*.pyd
+backend/.env
+frontend/.env.local
+
+# Backend storage and artifacts
+backend/local_qdrant/
+backend/xai_last_run.json
+backend/output_objectives/
+backend/data/
+
+# Python Virtual Environments
+venv/
+env/
+.venv/
+.pytest_cache/

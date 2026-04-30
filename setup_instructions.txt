@@ -1,0 +1,162 @@
+# VerifyX - Complete Local Setup & Deployment Guide
+
+This guide provides step-by-step instructions to set up the VerifyX (formerly Char-Chatore) Compliance RAG Engine on a completely new computer. 
+
+Since VerifyX relies on a hybrid architecture (local LLMs, local vector databases, cloud databases, and cloud LLM APIs), you must set up the infrastructure before running the servers.
+
+---
+
+## Prerequisites
+Before starting, ensure the new computer has the following installed:
+1. **Node.js** (v18+ recommended)
+2. **Python** (v3.10+ recommended)
+3. **Git**
+4. **Docker Desktop** (Required for running Elasticsearch locally)
+
+---
+
+## Step 1: Clone & Setup the Environment
+
+1. Clone or copy the project repository to your new machine.
+2. Open the project folder in your terminal.
+
+---
+
+## Step 2: Install Ollama (Local Embeddings)
+
+VerifyX uses Ollama to run local embedding models for semantic search (which keeps your data private and saves costs).
+
+1. Download and install Ollama from: https://ollama.com/
+2. Open a terminal and pull the required embedding model by running:
+   ```bash
+   ollama pull all-minilm
+   ```
+3. Ensure the Ollama app is running in the background (it normally runs on `http://127.0.0.1:11434`).
+
+---
+
+## Step 3: Setup Elasticsearch (BM25 Lexical Search)
+
+VerifyX uses a Hybrid RAG approach, meaning it needs Elasticsearch for exact-keyword matching.
+
+1. Open Docker Desktop and ensure the Docker engine is running.
+2. In your terminal, start a single-node local Elasticsearch instance with security enabled:
+   ```bash
+   docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=true" -e "ELASTIC_PASSWORD=your_secure_password" docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+   ```
+3. Wait about 30 seconds for it to start.
+4. Note down your credentials:
+   - **URL:** `https://localhost:9200`
+   - **Username:** `elastic`
+   - **Password:** `your_secure_password`
+
+*(Note: VerifyX is configured to bypass local self-signed TLS certificates for Elasticsearch during development).*
+
+---
+
+## Step 4: Setup Supabase (Authentication & PostgreSQL)
+
+VerifyX uses Supabase for user authentication, chat history, and UI state persistence.
+
+1. Go to https://supabase.com/ and create a new project.
+2. Go to **Authentication -> Providers** and enable "Email".
+3. In your Supabase dashboard, go to the **SQL Editor** and execute the database migrations found in:
+   `supabase/migrations/20250412120000_chat_messages_and_snapshot.sql`
+4. Go to **Project Settings -> API** and copy your `Project URL` and `anon public key`.
+5. Go to **Project Settings -> Database** and copy your `Connection string (URI)`.
+
+---
+
+## Step 5: Setup Groq (Fast Cloud LLM)
+
+VerifyX uses Groq for blazing-fast reasoning and BRD extraction.
+
+1. Go to https://console.groq.com/ and create an account.
+2. Navigate to API Keys and create a new key. Copy this key.
+
+---
+
+## Step 6: Backend Configuration & Startup
+
+1. Open a terminal and navigate to the backend folder:
+   ```bash
+   cd backend
+   ```
+2. Create a virtual environment and activate it:
+   ```bash
+   python -m venv venv
+   # Windows:
+   venv\Scripts\activate
+   # Mac/Linux:
+   source venv/bin/activate
+   ```
+3. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Create a `.env` file inside the `backend/` folder and add the following:
+
+   ```ini
+   # --- AI & Embeddings ---
+   GROQ_API_KEY=your_groq_api_key_here
+   BRD_GROQ_MODEL=llama-3.1-8b-instant
+   GROQ_MODEL=llama-3.1-8b-instant
+   EMBED_PROVIDER=ollama
+
+   # --- Local Qdrant (Vector DB) ---
+   # Qdrant runs purely via local files in VerifyX, no URL/API key needed!
+   QDRANT_PATH=local_qdrant/
+
+   # --- Elasticsearch ---
+   ELASTICSEARCH_URL=https://localhost:9200
+   ELASTICSEARCH_API_KEY=elastic:your_secure_password
+
+   # --- Supabase (Governance) ---
+   SUPABASE_DB_URL=your_supabase_postgresql_connection_string
+   ```
+
+5. **(First Time Only) Run Data Ingestion:**
+   Before the bot can answer questions, you must ingest the regulatory documents.
+   ```bash
+   python ingestion/ingest.py
+   ```
+   *This will take a few minutes. It will automatically generate a local Qdrant database folder (`local_qdrant/`) and upload chunks to Elasticsearch.*
+
+6. **Start the Backend Server:**
+   ```bash
+   uvicorn main:app
+   ```
+   *Keep this terminal window open.*
+
+---
+
+## Step 7: Frontend Configuration & Startup
+
+1. Open a **new** terminal and navigate to the frontend folder:
+   ```bash
+   cd frontend
+   ```
+2. Install Node dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file inside the `frontend/` folder and add the following:
+
+   ```ini
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+   ```
+
+4. **Start the Frontend Server:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## Step 8: Use VerifyX!
+
+1. Open your browser and go to `http://localhost:3000`
+2. Create an account via the Sign Up page.
+3. You can now use the **Query Bot** to ask regulatory questions or use the **BRD Upload** tab to analyze Business Requirement Documents!
