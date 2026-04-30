@@ -1,6 +1,6 @@
 # VerifyX - Compliance RAG Engine 🛡️
 
-**VerifyX** (formerly Char-Chatore) is a production-grade Regulatory RAG (Retrieval-Augmented Generation) system designed to transform raw regulatory documents (RBI, SEBI, etc.) into high-trust compliance engines.
+**VerifyX** is a production-grade Regulatory RAG (Retrieval-Augmented Generation) system designed to transform raw regulatory documents (RBI, SEBI, etc.) into high-trust compliance engines.
 
 It specializes in strict grounding, explainable attribution, and analyzing massive Business Requirement Documents (BRDs) against complex regulatory guidelines to highlight violations and provide remediations.
 

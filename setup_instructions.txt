@@ -1,6 +1,6 @@
 # VerifyX - Complete Local Setup & Deployment Guide
 
-This guide provides step-by-step instructions to set up the VerifyX (formerly Char-Chatore) Compliance RAG Engine on a completely new computer. 
+This guide provides step-by-step instructions to set up the VerifyXCompliance RAG Engine on a completely new computer. 
 
 Since VerifyX relies on a hybrid architecture (local LLMs, local vector databases, cloud databases, and cloud LLM APIs), you must set up the infrastructure before running the servers.
 
